@@ -5,16 +5,14 @@ let pokemons = [];
 const updatePaginationDiv = (currentPage, numPages) => {
 	$('#pagination').empty();
 
-	const radius = 2; // Number of pages to show before and after the current page.
+	const radius = 2;
 	const startPage = Math.max(currentPage - radius, 1);
 	const endPage = Math.min(currentPage + radius, numPages);
 
-	// Create Previous button
 	$('#pagination').append(`
-    <button class="btn btn-primary prevButton" ${currentPage === 1 ? 'disabled' : ''}>Prev</button>
+    <button class="btn btn-primary prevButton" style="${currentPage === 1 ? 'display: none;' : ''}">Prev</button>
   `);
 
-	// Create page number buttons
 	for (let i = startPage; i <= endPage; i++) {
 		$('#pagination').append(`
       <button class="btn btn-primary page ml-1 numberedButtons ${
@@ -23,9 +21,8 @@ const updatePaginationDiv = (currentPage, numPages) => {
     `);
 	}
 
-	// Create Next button
 	$('#pagination').append(`
-    <button class="btn btn-primary nextButton" ${currentPage === numPages ? 'disabled' : ''}>Next</button>
+    <button class="btn btn-primary nextButton" style="${currentPage === numPages ? 'display: none;' : ''}">Next</button>
   `);
 };
 
@@ -60,7 +57,7 @@ axios
 	.get('https://pokeapi.co/api/v2/type')
 	.then((response) => {
 		types = response.data.results.map((result) => result.name);
-		createTypeFilters(types); // Create filter options
+		createTypeFilters(types);
 	})
 	.catch((error) => {
 		console.error(error);
@@ -68,38 +65,38 @@ axios
 
 const filterByTypes = (types) => {
 	filteredPokemons = pokemons.filter((pokemon) => types.every((type) => pokemon.types.includes(type)));
-	currentPage = 1; // Reset the current page
+	currentPage = 1;
 	const numPages = Math.ceil(filteredPokemons.length / PAGE_SIZE);
-	paginate(currentPage, PAGE_SIZE, filteredPokemons); // Update the UI with the filtered pokemons
-	updatePaginationDiv(currentPage, numPages); // Update pagination
+	paginate(currentPage, PAGE_SIZE, filteredPokemons);
+	updatePaginationDiv(currentPage, numPages);
 };
 
 const createTypeFilters = (types) => {
-  const container = document.getElementById('typeFilter');
-  const checkboxGroup = document.createElement('div');
-  checkboxGroup.classList.add('checkbox-group');
+	const container = document.getElementById('typeFilter');
+	const checkboxGroup = document.createElement('div');
+	checkboxGroup.classList.add('checkbox-group');
 
-  types.forEach((type) => {
-    const checkboxContainer = document.createElement('div');
-    checkboxContainer.classList.add('custom-control', 'custom-checkbox', 'mr-3', 'mb-2');
+	types.forEach((type) => {
+		const checkboxContainer = document.createElement('div');
+		checkboxContainer.classList.add('custom-control', 'custom-checkbox', 'mr-3', 'mb-2');
 
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.value = type;
-    checkbox.id = `checkbox-${type}`;
-    checkbox.classList.add('custom-control-input');
+		const checkbox = document.createElement('input');
+		checkbox.type = 'checkbox';
+		checkbox.value = type;
+		checkbox.id = `checkbox-${type}`;
+		checkbox.classList.add('custom-control-input');
 
-    const label = document.createElement('label');
-    label.classList.add('custom-control-label');
-    label.htmlFor = `checkbox-${type}`;
-    label.innerText = type;
+		const label = document.createElement('label');
+		label.classList.add('custom-control-label');
+		label.htmlFor = `checkbox-${type}`;
+		label.innerText = type;
 
-    checkboxContainer.appendChild(checkbox);
-    checkboxContainer.appendChild(label);
-    checkboxGroup.appendChild(checkboxContainer);
-  });
+		checkboxContainer.appendChild(checkbox);
+		checkboxContainer.appendChild(label);
+		checkboxGroup.appendChild(checkboxContainer);
+	});
 
-  container.appendChild(checkboxGroup);
+	container.appendChild(checkboxGroup);
 
 	container.addEventListener('change', () => {
 		const checkedTypes = [];
@@ -137,21 +134,16 @@ const setup = async () => {
 			};
 		})
 	);
-	filteredPokemons = pokemons; // 초기 필터링이 적용되지 않은 경우, filteredPokemons를 pokemons로 초기화
+	filteredPokemons = pokemons;
 	paginate(currentPage, PAGE_SIZE, pokemons);
 	const numPages = Math.ceil(pokemons.length / PAGE_SIZE);
 	updatePaginationDiv(currentPage, numPages);
 	updatePokemonCounts(10, pokemons.length);
 
-	// pop up modal when clicking on a pokemon card
-	// add event listener to each pokemon card
 	$('body').on('click', '.pokeCard', async function (e) {
 		const pokemonName = $(this).attr('pokeName');
-		// console.log("pokemonName: ", pokemonName);
 		const res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
-		// console.log("res.data: ", res.data);
 		const types = res.data.types.map((type) => type.type.name);
-		// console.log("types: ", types);
 		$('.modal-body').html(`
         <div style="width:200px">
         <img src="${res.data.sprites.other['official-artwork'].front_default}" alt="${res.data.name}"/>
@@ -183,12 +175,10 @@ const setup = async () => {
         `);
 	});
 
-	// add event listener to pagination buttons
 	$('body').on('click', '.numberedButtons', async function (e) {
 		currentPage = Number(e.target.value);
 		paginate(currentPage, PAGE_SIZE, filteredPokemons);
 
-		//update pagination buttons
 		const numPages = Math.ceil(filteredPokemons.length / PAGE_SIZE);
 		updatePaginationDiv(currentPage, numPages);
 	});
